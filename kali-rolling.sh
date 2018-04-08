@@ -3599,16 +3599,6 @@ source "${file}" || source ~/.zshrc
 
 ##### Custom insert point
 
-##### Install Burp Pro
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Burp Pro${RESET} ~ via the web"
-apt -y -qq install git \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-git clone -q -b master https://github.com/zyayaa/burpsuite.git /opt/burpsuite/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/burpsuite/ >/dev/null
-git pull -q
-popd >/dev/null
-
 ##### Clean the system
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cleaning${RESET} the system"
 #--- Clean package manager
