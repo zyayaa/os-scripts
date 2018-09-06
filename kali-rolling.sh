@@ -1,13 +1,13 @@
 #!/bin/bash
 #-Metadata----------------------------------------------------#
-#  Filename: kali-rolling.sh             (Update: 2016-04-11) #
+#  Filename: kali-rolling.sh             (Update: 2016-09-21) #
 #-Info--------------------------------------------------------#
 #  Personal post-install script for Kali Linux Rolling        #
 #-Author(s)---------------------------------------------------#
 #  g0tmilk ~ https://blog.g0tmi1k.com/                        #
 #-Operating System--------------------------------------------#
 #  Designed for: Kali Linux Rolling [x64] (VM - VMware)       #
-#     Tested on: Kali Linux 2016.1 x64/x84/full/light/mini/vm #
+#     Tested on: Kali Linux 2016.2 x64/x84/full/light/mini/vm #
 #     Kali v1.x: https://g0tmi1k/os-scripts/master/kali1.sh   #
 #     Kali v2.x: https://g0tmi1k/os-scripts/master/kali2.sh   #
 #-Licence-----------------------------------------------------#
@@ -26,9 +26,9 @@
 #    -keyboard <value> = Change the keyboard layout language  #
 #    -timezone <value> = Change the timezone location         #
 #                                                             #
-#  e.g. # bash kali-rolling.sh  -burp -openvas -keyboard gb   #
+#  e.g. # bash kali-rolling.sh -burp -keyboard gb -openvas    #
 #                             ---                             #
-#  Will cut it up (so modular based), when its in its repo    #
+#  Will cut it up (so modular based), at a later date...      #
 #                             ---                             #
 #             ** This script is meant for _ME_. **            #
 #         ** EDIT this to meet _YOUR_ requirements! **        #
@@ -69,8 +69,8 @@ BLUE="\033[01;34m"     # Heading
 BOLD="\033[01;01m"     # Highlight
 RESET="\033[00m"       # Normal
 
-STAGE=0                                                       # Where are we up to
-TOTAL=$(grep '(${STAGE}/${TOTAL})' $0 | wc -l);(( TOTAL-- ))  # How many things have we got todo
+STAGE=0                                                         # Where are we up to
+TOTAL=$( grep '(${STAGE}/${TOTAL})' $0 | wc -l );(( TOTAL-- ))  # How many things have we got todo
 
 
 #-Arguments------------------------------------------------------------#
@@ -155,7 +155,7 @@ export TERM=xterm
 if [[ $(which gnome-shell) ]]; then
   ##### RAM check
   if [[ "$(free -m | grep -i Mem | awk '{print $2}')" < 2048 ]]; then
-    echo -e '\n '${RED}'[!]'${RESET}" ${RED}You have 2GB or less of RAM and using GNOME${RESET}" 1>&2
+    echo -e '\n '${RED}'[!]'${RESET}" ${RED}You have <= 2GB of RAM and using GNOME${RESET}" 1>&2
     echo -e " ${YELLOW}[i]${RESET} ${YELLOW}Might want to use XFCE instead${RESET}..."
     sleep 15s
   fi
@@ -220,14 +220,14 @@ else
   echo -e " ${YELLOW}[i]${RESET} ${YELLOW}Detected Internet access${RESET}" 1>&2
 fi
 #--- GitHub under DDoS?
-(( STAGE++ )); echo -e " ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Checking ${GREEN}GitHub status${RESET}"
+(( STAGE++ )); echo -e " ${GREEN}[i]${RESET} (${STAGE}/${TOTAL}) Checking ${GREEN}GitHub status${RESET}"
 timeout 300 curl --progress -k -L -f "https://status.github.com/api/status.json" | grep -q "good" \
   || (echo -e ' '${RED}'[!]'${RESET}" ${RED}GitHub is currently having issues${RESET}. ${BOLD}Lots may fail${RESET}. See: https://status.github.com/" 1>&2 \
     && exit 1)
 
 
 ##### Enable default network repositories ~ http://docs.kali.org/general-use/kali-linux-sources-list-repositories
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Enabling default Kali ${GREEN}network repositories${RESET}"
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Enabling default OS ${GREEN}network repositories${RESET}"
 #--- Add network repositories
 file=/etc/apt/sources.list; [ -e "${file}" ] && cp -n $file{,.bkup}
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
@@ -255,13 +255,30 @@ fi
 ##### Check to see if Kali is in a VM. If so, install "Virtual Machine Addons/Tools" for a "better" virtual experiment
 if (dmidecode | grep -iq vmware); then
   ##### Install virtual machines tools ~ http://docs.kali.org/general-use/install-vmware-tools-kali-guest
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VMware's virtual machine tools${RESET}"
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VMware's (open) virtual machine tools${RESET}"
   apt -y -qq install open-vm-tools-desktop fuse \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   apt -y -qq install make \
-    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2    # nags afterwards
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2    # There's a nags afterwards
+  ## Shared folders support for Open-VM-Tools (some odd bug)
+  file=/usr/local/sbin/mount-shared-folders; [ -e "${file}" ] && cp -n $file{,.bkup}
+  cat <<EOF > "${file}" \
+    || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+
+vmware-hgfsclient | while read folder; do
+  echo "[i] Mounting \${folder}   (/mnt/hgfs/\${folder})"
+  mkdir -p "/mnt/hgfs/\${folder}"
+  umount -f "/mnt/hgfs/\${folder}" 2>/dev/null
+  vmhgfs-fuse -o allow_other -o auto_unmount ".host:/\${folder}" "/mnt/hgfs/\${folder}"
+done
+
+sleep 2s
+EOF
+  chmod +x "${file}"
+  ln -sf "${file}" /root/Desktop/mount-shared-folders.sh
 elif (dmidecode | grep -iq virtualbox); then
-  ##### Installing Virtualbox Guest Additions.   Note: Need VirtualBox 4.2.xx+ for the host (http://docs.kali.org/general-use/kali-linux-virtual-box-guest)
+  ##### Installing VirtualBox Guest Additions.   Note: Need VirtualBox 4.2.xx+ for the host (http://docs.kali.org/general-use/kali-linux-virtual-box-guest)
   (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VirtualBox's guest additions${RESET}"
   apt -y -qq install virtualbox-guest-x11 \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -335,6 +352,7 @@ else
   echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping time zone${RESET} (missing: '$0 ${BOLD}--timezone <value>${RESET}')..." 1>&2
 fi
 #--- Installing ntp tools
+(( STAGE++ )); echo -e " ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}ntpdate${RESET} ~ keeping the time in sync"
 apt -y -qq install ntp ntpdate \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Update time
@@ -396,6 +414,8 @@ apt -y -qq install kali-linux-full \
 
 ##### Set audio level
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting ${GREEN}audio${RESET} levels"
+systemctl --user enable pulseaudio
+systemctl --user start pulseaudio
 pactl set-sink-mute 0 0
 pactl set-sink-volume 0 25%
 
@@ -457,7 +477,7 @@ fi
 export DISPLAY=:0.0
 apt -y -qq install curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-apt -y -qq install xfce4 xfce4-mount-plugin xfce4-notifyd xfce4-places-plugin \
+apt -y -qq install xfce4 xfce4-mount-plugin xfce4-notifyd xfce4-places-plugin xfce4-power-manager \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 (dmidecode | grep -iq virtual) \
   || (apt -y -qq install xfce4-battery-plugin \
@@ -465,6 +485,7 @@ apt -y -qq install xfce4 xfce4-mount-plugin xfce4-notifyd xfce4-places-plugin \
 #--- Configuring XFCE
 mkdir -p ~/.config/xfce4/panel/launcher-{2,4,5,6,7,8,9}/
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/
+#--- Configuring XFCE (Keyboard shortcuts)
 cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 <?xml version="1.0" encoding="UTF-8"?>
@@ -548,6 +569,21 @@ cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.
   </property>
 </channel>
 EOF
+#--- Configuring XFCE (Power Options)
+cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+<?xml version="1.0" encoding="UTF-8"?>
+
+<channel name="xfce4-power-manager" version="1.0">
+  <property name="xfce4-power-manager" type="empty">
+    <property name="power-button-action" type="empty"/>
+    <property name="dpms-enabled" type="bool" value="true"/>
+    <property name="blank-on-ac" type="int" value="0"/>
+    <property name="dpms-on-ac-sleep" type="uint" value="0"/>
+    <property name="dpms-on-ac-off" type="uint" value="0"/>
+  </property>
+</channel>
+EOF
 #--- Desktop files
 ln -sf /usr/share/applications/exo-terminal-emulator.desktop ~/.config/xfce4/panel/launcher-2/exo-terminal-emulator.desktop
 ln -sf /usr/share/applications/kali-wireshark.desktop        ~/.config/xfce4/panel/launcher-4/kali-wireshark.desktop
@@ -602,7 +638,7 @@ xfconf-query -n -c xfce4-panel -p /plugins/plugin-5/items -t string -s "firefox-
   && xfconf-query -n -c xfce4-panel -p /plugins/plugin-6/items -t string -s "kali-burpsuite.desktop" -a
 #--- metasploit
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-7/items -t string -s "kali-msfconsole.desktop" -a
-#--- gedit/atom
+#--- gedit
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-8/items -t string -s "textedit.desktop" -a
 #--- search
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-9/items -t string -s "xfce4-appfinder.desktop" -a
@@ -702,7 +738,7 @@ update-alternatives --set x-session-manager /usr/bin/xfce4-session   #update-alt
 export DISPLAY=:0.0
 #--- axiom / axiomd (May 18 2010) XFCE4 theme ~ http://xfce-look.org/content/show.php/axiom+xfwm?content=90145
 mkdir -p ~/.themes/
-timeout 300 curl --progress -k -L -f "http://xfce-look.org/CONTENT/content-files/90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
+timeout 300 curl --progress -k -L -f "https://dl.opendesktop.org/api/files/download/id/1461767736/90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading axiom.tar.gz" 1>&2    #***!!! hardcoded path!
 tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
 xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
@@ -721,8 +757,8 @@ echo -n '[5/10]'; timeout 300 curl --progress -k -L -f "http://wallpaperstock.ne
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali-linux_wallpapers_39530.png" 1>&2
 echo -n '[6/10]'; timeout 300 curl --progress -k -L -f "http://em3rgency.com/wp-content/uploads/2012/12/Kali-Linux-faded-no-Dragon-small-text.png" > /usr/share/wallpapers/kali_black_clean.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_clean.png" 1>&2
-echo -n '[7/10]'; timeout 300 curl --progress -k -L -f "http://www.hdwallpapers.im/download/kali_linux-wallpaper.jpg" > /usr/share/wallpapers/kali_black_stripes.jpg \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_stripes.jpg" 1>&2
+#echo -n '[7/10]'; timeout 300 curl --progress -k -L -f "http://www.hdwallpapers.im/download/kali_linux-wallpaper.jpg" > /usr/share/wallpapers/kali_black_stripes.jpg \
+#  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_stripes.jpg" 1>&2
 echo -n '[8/10]'; timeout 300 curl --progress -k -L -f "http://fc01.deviantart.net/fs71/f/2011/118/e/3/bt___edb_wallpaper_by_xxdigipxx-d3f4nxv.png" > /usr/share/wallpapers/kali_bt_edb.jpg \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_bt_edb.jpg" 1>&2
 echo -n '[9/10]'; timeout 300 curl --progress -k -L -f "http://pre07.deviantart.net/58d1/th/pre/i/2015/223/4/8/kali_2_0_alternate_wallpaper_by_xxdigipxx-d95800s.png" > /usr/share/wallpapers/kali_2_0_alternate_wallpaper.png \
@@ -741,6 +777,7 @@ for FILE in $(echo ${_TMP}); do rm -f "${FILE}"; done
 [ -e "/usr/share/images/desktop-base/kali-wallpaper_1920x1080.png" ] \
   && ln -sf /usr/share/images/desktop-base/kali-wallpaper_1920x1080.png /usr/share/wallpapers/kali_default2.0-1920x1080.jpg
 #--- New wallpaper & add to startup (so its random each login)
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/rand-wallpaper; [ -e "${file}" ] && cp -n $file{,.bkup}
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -748,14 +785,20 @@ cat <<EOF > "${file}" \
 
 wallpaper="\$(shuf -n1 -e \$(find /usr/share/wallpapers/ -maxdepth 1 -name 'kali_*'))"
 
+## XFCE - Desktop wallpaper
 /usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -t bool -s true
-/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -t string -s "\${wallpaper}"   # XFCE - Desktop wallpaper
+/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -t string -s "\${wallpaper}"
+/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -t string -s "\${wallpaper}"
 
+## GNOME - Desktop wallpaper
 #[[ $(which gnome-shell) ]] \
-#  && dconf write /org/gnome/desktop/background/picture-uri "'file://\${wallpaper}'"                              # GNOME - Desktop wallpaper
+#  && dconf write /org/gnome/desktop/background/picture-uri "'file://\${wallpaper}'"
 
-/usr/bin/dconf write /org/gnome/desktop/screensaver/picture-uri "'file://\${wallpaper}'"                          # Change lock wallpaper (before swipe) - kali 2 & rolling
-#cp -f "\${wallpaper}" /usr/share/gnome-shell/theme/KaliLogin.png                                                 # Change login wallpaper (after swipe) - kali 2
+## Change lock wallpaper (before swipe) - kali 2 & rolling
+/usr/bin/dconf write /org/gnome/desktop/screensaver/picture-uri "'file://\${wallpaper}'"
+
+## Change login wallpaper (after swipe) - kali 2
+#cp -f "\${wallpaper}" /usr/share/gnome-shell/theme/KaliLogin.png
 
 /usr/bin/xfdesktop --reload 2>/dev/null &
 EOF
@@ -1031,6 +1074,8 @@ grep -q '^## samba' "${file}" 2>/dev/null \
   || echo -e '## samba\nalias smb-start="systemctl restart smbd nmbd"\nalias smb-stop="systemctl stop smbd nmbd"\n' >> "${file}"
 grep -q '^## rdesktop' "${file}" 2>/dev/null \
   || echo -e '## rdesktop\nalias rdesktop="rdesktop -z -P -g 90% -r disk:local=\"/tmp/\""\n' >> "${file}"
+grep -q '^## python http' "${file}" 2>/dev/null \
+  || echo -e '## python http\nalias http="python2 -m SimpleHTTPServer"\n' >> "${file}"
 #--- Add in folders
 grep -q '^## www' "${file}" 2>/dev/null \
   || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n#alias www="cd /var/www/html/"\n' >> "${file}"
@@ -1115,7 +1160,7 @@ grep -q '/usr/bin/tmux' "${file}" 2>/dev/null \
 #--- Configure zsh (themes) ~ https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 sed -i 's/ZSH_THEME=.*/ZSH_THEME="mh"/' "${file}"   # Other themes: mh, jreese,   alanpeabody,   candy,   terminalparty, kardan,   nicoulaj, sunaku
 #--- Configure oh-my-zsh
-sed -i 's/plugins=(.*)/plugins=(git git-extras tmux last-working-dir dirhistory python pip)/' "${file}"
+sed -i 's/plugins=(.*)/plugins=(git git-extras tmux dirhistory python pip)/' "${file}"
 #--- Set zsh as default shell (current user)
 chsh -s "$(which zsh)"
 
@@ -1347,13 +1392,13 @@ sed -i 's/^.network.security.ports.banned.override/user_pref("network.security.p
 file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'bookmarks.html' -print -quit)
 [ -e "${file}" ] \
   && cp -n $file{,.bkup}   #/etc/firefox-esr/profile/bookmarks.html
-timeout 300 curl --progress -k -L -f "http://pentest-bookmarks.googlecode.com/files/bookmarksv1.5.html" > /tmp/bookmarks_new.html \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading bookmarks_new.html" 1>&2      #***!!! hardcoded version! Need to manually check for updates
+#timeout 300 curl --progress -k -L -f "http://pentest-bookmarks.googlecode.com/files/bookmarksv1.5.html" > /tmp/bookmarks_new.html \
+#  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading bookmarks_new.html" 1>&2      #***!!! hardcoded version! Need to manually check for updates
 #--- Configure bookmarks
-awk '!a[$0]++' /tmp/bookmarks_new.html \
-  | \egrep -v ">(Latest Headlines|Getting Started|Recently Bookmarked|Recent Tags|Mozilla Firefox|Help and Tutorials|Customize Firefox|Get Involved|About Us|Hacker Media|Bookmarks Toolbar|Most Visited)</" \
-  | \egrep -v "^    </DL><p>" \
-  | \egrep -v "^<DD>Add" > "${file}"
+#awk '!a[$0]++' /tmp/bookmarks_new.html \
+#  | \egrep -v ">(Latest Headlines|Getting Started|Recently Bookmarked|Recent Tags|Mozilla Firefox|Help and Tutorials|Customize Firefox|Get Involved|About Us|Hacker Media|Bookmarks Toolbar|Most Visited)</" \
+#  | \egrep -v "^    </DL><p>" \
+#  | \egrep -v "^<DD>Add" > "${file}"
 sed -i 's#^</DL><p>#        </DL><p>\n    </DL><p>\n</DL><p>#' "${file}"                                          # Fix import issues from pentest-bookmarks...
 sed -i 's#^    <DL><p>#    <DL><p>\n    <DT><A HREF="http://127.0.0.1/">localhost</A>#' "${file}"                 # Add localhost to bookmark toolbar (before hackery folder)
 sed -i 's#^</DL><p>#    <DT><A HREF="https://127.0.0.1:8834/">Nessus</A>\n</DL><p>#' "${file}"                    # Add Nessus UI bookmark toolbar
@@ -1612,6 +1657,7 @@ cat <<EOF >> "${file}"
 EOF
 fi
 #--- Create start script
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/start-conky; [ -e "${file}" ] && cp -n $file{,.bkup}
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -1752,7 +1798,7 @@ msfvenom --list payloads > ~/.msf4/msfvenom/payloads
 msfvenom --list encoders > ~/.msf4/msfvenom/encoders
 msfvenom --help-formats 2> ~/.msf4/msfvenom/formats
 #--- First time run with Metasploit
-(( STAGE++ )); echo -e " ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Starting Metasploit for the first time${RESET} ~ this ${BOLD}will take a ~350 seconds${RESET} (~6 mintues)"
+(( STAGE++ )); echo -e " ${GREEN}[i]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Starting Metasploit for the first time${RESET} ~ this ${BOLD}will take a ~350 seconds${RESET} (~6 mintues)"
 echo "Started at: $(date)"
 systemctl start postgresql
 msfdb start
@@ -1785,45 +1831,37 @@ apt -y -qq install msfpc \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-###### Install atom
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}atom${RESET} ~ GUI text editor"
-timeout 300 curl --progress -k -L -f "https://atom.io/download/deb" > /tmp/atom.deb \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading atom.deb" 1>&2
-if [ -e /tmp/atom.deb ]; then
-  dpkg -i /tmp/atom.deb
-  #--- Create config file
-  mkdir -p ~/.atom/
-  file=~/.atom/config.cson
-  if [[ -f "${file}" ]]; then
-    echo -e ' '${RED}'[!]'${RESET}" ${file} detected. Skipping..." 1>&2
-  else
-    cat <<EOF > "${file}"
-"*":
-  welcome:
-    showOnStartup: false
-  core:
-    disabledPackages: [
-      "metrics"
-    ]
-EOF
-  fi
-  #--- Add to panel (GNOME)
-  export DISPLAY=:0.0
-  [[ $(which gnome-shell) ]] \
-    && gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed "s/'org.gnome.gedit.desktop'/'atom.desktop'/")"
-  #--- Add to panel (XFCE)
-  ln -sf /usr/share/applications/atom.desktop ~/.config/xfce4/panel/launcher-8/textedit.desktop
-fi
+##### Configuring Gedit
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}Gedit${RESET} ~ GUI text editor"
+#--- Install Gedit
+apt -y -qq install gedit \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Configure Gedit
+dconf write /org/gnome/gedit/preferences/editor/wrap-last-split-mode "'word'"
+dconf write /org/gnome/gedit/preferences/ui/statusbar-visible true
+dconf write /org/gnome/gedit/preferences/editor/display-line-numbers true
+dconf write /org/gnome/gedit/preferences/editor/highlight-current-line true
+dconf write /org/gnome/gedit/preferences/editor/bracket-matching true
+dconf write /org/gnome/gedit/preferences/editor/insert-spaces true
+dconf write /org/gnome/gedit/preferences/editor/auto-indent true
+for plugin in modelines sort externaltools docinfo filebrowser quickopen time spell; do
+  loaded=$( dconf read /org/gnome/gedit/plugins/active-plugins )
+  echo ${loaded} | grep -q "'${plugin}'" \
+    && continue
+  new=$( echo "${loaded} '${plugin}']" | sed "s/'] /', /" )
+  dconf write /org/gnome/gedit/plugins/active-plugins "${new}"
+done
 
 
 ##### Install PyCharm (Community Edition)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}PyCharm (Community Edition)${RESET} ~ Python IDE"
-timeout 300 curl --progress -k -L -f "https://download.jetbrains.com/python/pycharm-community-2016.1.1.tar.gz" > /tmp/pycharms-community.tar.gz \
+timeout 300 curl --progress -k -L -f "https://download.jetbrains.com/python/pycharm-community-2016.2.3.tar.gz" > /tmp/pycharms-community.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pycharms-community.tar.gz" 1>&2       #***!!! hardcoded version!
 if [ -e /tmp/pycharms-community.tar.gz ]; then
   tar -xf /tmp/pycharms-community.tar.gz -C /tmp/
   rm -rf /opt/pycharms/
   mv -f /tmp/pycharm-community-*/ /opt/pycharms
+  mkdir -p /usr/local/bin/
   ln -sf /opt/pycharms/bin/pycharm.sh /usr/local/bin/pycharms
 fi
 
@@ -2035,7 +2073,7 @@ apt -y -qq install silversearcher-ag \
 
 ##### Install rips
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}rips${RESET} ~ source code scanner"
-apt -y -qq install apache2 php5 git \
+apt -y -qq install apache2 php git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/ripsscanner/rips.git /opt/rips-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -2070,6 +2108,7 @@ pushd /opt/graudit-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/graudit-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -2302,7 +2341,7 @@ apt -y -qq install aircrack-ng curl \
 #--- Setup hardware database
 mkdir -p /etc/aircrack-ng/
 (timeout 600 airodump-ng-oui-update 2>/dev/null) \
-  || timeout 600 curl --progress -k -L -f "http://standards.ieee.org/develop/regauth/oui/oui.txt" > /etc/aircrack-ng/oui.txt
+  || timeout 600 curl --progress -k -L -f "http://standards-oui.ieee.org/oui/oui.txt" > /etc/aircrack-ng/oui.txt
 [ -e /etc/aircrack-ng/oui.txt ] \
   && (\grep "(hex)" /etc/aircrack-ng/oui.txt | sed 's/^[ \t]*//g;s/[ \t]*$//g' > /etc/aircrack-ng/airodump-ng-oui.txt)
 [[ ! -f /etc/aircrack-ng/airodump-ng-oui.txt ]] \
@@ -2365,6 +2404,7 @@ pushd /opt/onetwopunch-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/onetwopunch-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -2386,6 +2426,7 @@ git pull -q
 popd >/dev/null
 #--- Add to path
 chmod +x /opt/gnmap-parser-git/gnmap-parser.sh
+mkdir -p /usr/local/bin/
 ln -sf /opt/gnmap-parser-git/gnmap-parser.sh /usr/local/bin/gnmap-parser-git
 
 
@@ -2399,6 +2440,7 @@ gunzip /tmp/udp-proto-scanner.tar.gz
 tar -xf /tmp/udp-proto-scanner.tar -C /opt/
 mv -f /opt/udp-proto-scanner{-1.1,}
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/udp-proto-scanner
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -2420,6 +2462,7 @@ apt -y -qq install clusterd \
 apt -y -qq install webhandler \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Add to path
+mkdir -p /usr/local/bin/
 ln -sf /usr/bin/webhandler /usr/local/bin/wh
 
 
@@ -2456,25 +2499,10 @@ git pull -q
 popd >/dev/null
 
 
-##### Install gobuster (https://bugs.kali.org/view.php?id=2438)
+##### Install gobuster
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}gobuster${RESET} ~ Directory/File/DNS busting tool"
-apt -y -qq install git golang \
+apt -y -qq install git gobuster \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-git clone -q -b master https://github.com/OJ/gobuster.git /opt/gobuster-git/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/gobuster-git/ >/dev/null
-git pull -q
-go build
-popd >/dev/null
-#--- Add to path
-file=/usr/local/bin/gobuster-git
-cat <<EOF > "${file}" \
-  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
-#!/bin/bash
-
-cd /opt/gobuster-git/ && ./gobuster-git "\$@"
-EOF
-chmod +x "${file}"
 
 
 ##### Install reGeorg
@@ -2492,7 +2520,7 @@ ln -sf /opt/reGeorg-git /usr/share/webshells/reGeorg
 
 ##### Install b374k (https://bugs.kali.org/view.php?id=1097)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}b374k${RESET} ~ (PHP) web shell"
-apt -y -qq install git php5-cli \
+apt -y -qq install git php-cli \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/b374k/b374k.git /opt/b374k-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -2651,6 +2679,7 @@ pushd /opt/wifiphisher-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/wifiphisher-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -2685,6 +2714,7 @@ make -s clean
 make -s 2>/dev/null && make -s install   # bad, but it gives errors which might be confusing (still builds)
 popd >/dev/null
 #--- Add to path (with a 'better' name)
+mkdir -p /usr/local/bin/
 ln -sf /usr/bin/proxychains4 /usr/local/bin/proxychains-ng
 
 
@@ -2821,7 +2851,7 @@ apt -y -qq install wine winetricks \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Using x64?
 if [[ "$(uname -m)" == 'x86_64' ]]; then
-  (( STAGE++ )); echo -e " ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}WINE (x64)${RESET}"
+  (( STAGE++ )); echo -e " ${GREEN}[i]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}WINE (x64)${RESET}"
   dpkg --add-architecture i386
   apt -qq update
   apt -y -qq install wine32 \
@@ -2913,9 +2943,8 @@ echo -n '[1/3]'; timeout 300 curl --progress -k -L -f "http://www.eskimo.com/~sc
 echo -n '[2/3]'; timeout 300 curl --progress -k -L -f "http://www.farbrausch.de/~fg/kkrunchy/kkrunchy_023a2.zip" > /opt/packers/kkrunchy.zip \
   && unzip -q -o -d /opt/packers/ /opt/packers/kkrunchy.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kkrunchy.zip" 1>&2        #***!!! hardcoded version! Need to manually check for updates
-echo -n '[3/3]'; timeout 300 curl --progress -k -L -f "https://pescrambler.googlecode.com/files/PEScrambler_v0_1.zip" > /opt/packers/PEScrambler.zip \
-  && unzip -q -o -d /opt/packers/ /opt/packers/PEScrambler.zip \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading PEScrambler.zip" 1>&2     #***!!! hardcoded version! Need to manually check for updates
+echo -n '[3/3]'; timeout 300 curl --progress -k -L -f "https://github.com/Veil-Framework/Veil-Evasion/blob/master/tools/pescrambler/PEScrambler.exe" > /opt/packers/PEScrambler \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading PEScrambler.exe" 1>&2     #***!!! hardcoded version! Need to manually check for updates
 #*** ??????? Need to make a bash script like hyperion...
 #--- Link to others
 apt -y -qq install windows-binaries \
@@ -2937,6 +2966,7 @@ wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/Hyperion-1.0/
   -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
   | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/hyperion
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -3018,17 +3048,6 @@ apt -y -qq install responder \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install seclist
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}seclist${RESET} ~ multiple types of (word)lists (and similar things)"
-apt -y -qq install seclists \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-#--- Link to others
-apt -y -qq install wordlists \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-[ -e /usr/share/seclists ] \
-  && ln -sf /usr/share/seclists /usr/share/wordlists/seclists
-
-
 ##### Update wordlists
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Updating ${GREEN}wordlists${RESET} ~ collection of wordlists"
 apt -y -qq install wordlists curl \
@@ -3099,6 +3118,7 @@ pushd /opt/shellconv-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/shellconv-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -3110,9 +3130,9 @@ chmod +x "${file}"
 
 
 ##### Install bless
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}bless${RESET} ~ GUI hex editor"
-apt -y -qq install bless \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}bless${RESET} ~ GUI hex editor"
+#apt -y -qq install bless \
+#  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
 ##### Install dhex
@@ -3205,6 +3225,7 @@ pushd /opt/wig-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/wig-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -3225,6 +3246,7 @@ pushd /opt/cmsmap-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/cmsmap-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -3245,6 +3267,7 @@ pushd /opt/droopescan-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/droopescan-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -3282,6 +3305,7 @@ pushd /opt/patator-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/patator-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -3302,6 +3326,7 @@ pushd /opt/crowbar-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 file=/usr/local/bin/crowbar-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -3343,6 +3368,7 @@ make -s clean;
 make -s 2>/dev/null    # bad, I know
 popd >/dev/null
 #--- Add to path
+mkdir -p /usr/local/bin/
 ln -sf /usr/local/src/nbtscan-unixwiz/nbtscan /usr/local/bin/nbtscan-uw
 #--- Examples
 #nbtscan-uw -f 192.168.0.1/24
@@ -3476,14 +3502,15 @@ grep -q '^## smb' "${file}" 2>/dev/null \
 source "${file}" || source ~/.zshrc
 
 
-##### Install apache2 & php5
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}apache2${RESET} & ${GREEN}php5${RESET} ~ web server"
-apt -y -qq install apache2 php5 php5-cli php5-curl \
+##### Install apache2 & php
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}apache2${RESET} & ${GREEN}php${RESET} ~ web server"
+apt -y -qq install apache2 php php-cli php-curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 touch /var/www/html/favicon.ico
 grep -q '<title>Apache2 Debian Default Page: It works</title>' /var/www/html/index.html 2>/dev/null \
   && rm -f /var/www/html/index.html \
-  && echo '<?php echo "Access denied for " . $_SERVER["REMOTE_ADDR"]; ?>' > /var/www/html/index.php
+  && echo '<?php echo "Access denied for " . $_SERVER["REMOTE_ADDR"]; ?>' > /var/www/html/index.php \
+  && echo -e 'User-agent: *n\Disallow: /\n' > /var/www/html/robots.txt
 #--- Setup alias
 file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
@@ -3531,6 +3558,7 @@ timeout 300 curl --progress -k -L -f "http://dbeaver.jkiss.org/files/dbeaver-ce_
 if [ -e /tmp/dbeaver.deb ]; then
   dpkg -i /tmp/dbeaver.deb
   #--- Add to path
+  mkdir -p /usr/local/bin/
   ln -sf /usr/share/dbeaver/dbeaver /usr/local/bin/dbeaver
 fi
 
@@ -3598,6 +3626,24 @@ source "${file}" || source ~/.zshrc
 
 
 ##### Custom insert point
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting up ${GREEN}Custom tools${RESET} ~ GitHub"
+git clone -q https://github.com/zyayaa/Tools.git /opt/Tools
+
+git clone -q https://github.com/lgandx/Responder.git /opt/Responder
+
+git clone -q https://github.com/rasta-mouse/Sherlock.git /opt/Sherlock
+
+git clone -q https://github.com/Genetic-Malware/Ebowla.git /opt/Ebowla
+
+git clone -q https://github.com/danielmiessler/SecLists.git /opt/SecLists
+ln -sf /opt/SecLists /usr/share/wordlists/SecLists
+
+git clone -q https://github.com/andrew-d/static-binaries.git /opt/static-binaries
+
+git clone -q https://github.com/ZephrFish/static-tools /opt/static-tools
+
+git clone -q https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap-dev
+
 
 ##### Clean the system
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cleaning${RESET} the system"
@@ -3609,7 +3655,7 @@ updatedb
 #--- Reset folder location
 cd ~/ &>/dev/null
 #--- Remove any history files (as they could contain sensitive info)
-history -c 2>/dev/null
+history -cw 2>/dev/null
 for i in $(cut -d: -f6 /etc/passwd | sort -u); do
   [ -e "${i}" ] && find "${i}" -type f -name '.*_history' -delete
 done
@@ -3618,6 +3664,7 @@ done
 ##### Time taken
 finish_time=$(date +%s)
 echo -e "\n\n ${YELLOW}[i]${RESET} Time (roughly) taken: ${YELLOW}$(( $(( finish_time - start_time )) / 60 )) minutes${RESET}"
+echo -e " ${YELLOW}[i]${RESET} Stages skipped: $(( TOTAL-STAGE ))"
 
 
 #-Done-----------------------------------------------------------------#
@@ -3627,7 +3674,7 @@ echo -e "\n\n ${YELLOW}[i]${RESET} Time (roughly) taken: ${YELLOW}$(( $(( finish
 echo -e "\n ${YELLOW}[i]${RESET} Don't forget to:"
 echo -e " ${YELLOW}[i]${RESET} + Check the above output (Did everything install? Any errors? (${RED}HINT: What's in RED${RESET}?)"
 echo -e " ${YELLOW}[i]${RESET} + Manually install: Nessus, Nexpose, and/or Metasploit Community"
-echo -e " ${YELLOW}[i]${RESET} + Agree/Accept to: Maltego, OWASP ZAP, w3af, etc"
+echo -e " ${YELLOW}[i]${RESET} + Agree/Accept to: Maltego, OWASP ZAP, w3af, PyCharm, etc"
 echo -e " ${YELLOW}[i]${RESET} + Setup git:   ${YELLOW}git config --global user.name <name>;git config --global user.email <email>${RESET}"
 echo -e " ${YELLOW}[i]${RESET} + ${BOLD}Change default passwords${RESET}: PostgreSQL/MSF, MySQL, OpenVAS, BeEF XSS, etc"
 echo -e " ${YELLOW}[i]${RESET} + ${YELLOW}Reboot${RESET}"
