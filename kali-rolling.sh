@@ -3627,22 +3627,10 @@ source "${file}" || source ~/.zshrc
 
 ##### Custom insert point
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting up ${GREEN}Custom tools${RESET} ~ GitHub"
+
 git clone -q https://github.com/zyayaa/Tools.git /opt/Tools
 
-git clone -q https://github.com/lgandx/Responder.git /opt/Responder
-
-git clone -q https://github.com/rasta-mouse/Sherlock.git /opt/Sherlock
-
-git clone -q https://github.com/Genetic-Malware/Ebowla.git /opt/Ebowla
-
-git clone -q https://github.com/danielmiessler/SecLists.git /opt/SecLists
-ln -sf /opt/SecLists /usr/share/wordlists/SecLists
-
-git clone -q https://github.com/andrew-d/static-binaries.git /opt/static-binaries
-
-git clone -q https://github.com/ZephrFish/static-tools /opt/static-tools
-
-git clone -q https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap-dev
+ln -sf /opt/Tools/WordLists/SecLists /usr/share/wordlists/SecLists
 
 
 ##### Clean the system
