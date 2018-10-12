@@ -3629,8 +3629,11 @@ source "${file}" || source ~/.zshrc
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting up ${GREEN}Custom tools${RESET} ~ GitHub"
 
 git clone -q https://github.com/zyayaa/Tools.git /opt/Tools
-
+cd Tools
+git submodule init
+git submodule update
 ln -sf /opt/Tools/WordLists/SecLists /usr/share/wordlists/SecLists
+cd ..
 
 
 ##### Clean the system
