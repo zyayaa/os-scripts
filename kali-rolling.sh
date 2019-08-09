@@ -3632,6 +3632,9 @@ git clone -q https://github.com/zyayaa/Tools.git /opt/Tools
 
 ln -sf /opt/Tools/WordLists/SecLists /usr/share/wordlists/SecLists
 
+git clone https://github.com/longld/peda.git ~/peda
+echo "source ~/peda/peda.py" >> ~/.gdbinit
+
 ##### Clean the system
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cleaning${RESET} the system"
 #--- Clean package manager
