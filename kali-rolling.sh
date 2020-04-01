@@ -3628,7 +3628,7 @@ source "${file}" || source ~/.zshrc
 ##### Custom insert point
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting up ${GREEN}Custom tools${RESET} ~ GitHub"
 
-git clone -q https://github.com/zyayaa/Tools.git /opt/Tools
+git clone --recurse-submodules -q https://github.com/zyayaa/Tools.git /opt/Tools
 
 ln -sf /opt/Tools/WordLists/SecLists /usr/share/wordlists/SecLists
 
