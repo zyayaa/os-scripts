@@ -221,7 +221,7 @@ else
 fi
 #--- GitHub under DDoS?
 (( STAGE++ )); echo -e " ${GREEN}[i]${RESET} (${STAGE}/${TOTAL}) Checking ${GREEN}GitHub status${RESET}"
-timeout 300 curl --progress -k -L -f "https://status.github.com/api/status.json" | grep -q "good" \
+timeout 300 curl --progress-bar -k -L -f "https://status.github.com/api/status.json" | grep -q "good" \
   || (echo -e ' '${RED}'[!]'${RESET}" ${RED}GitHub is currently having issues${RESET}. ${BOLD}Lots may fail${RESET}. See: https://status.github.com/" 1>&2 \
     && exit 1)
 
@@ -738,32 +738,32 @@ update-alternatives --set x-session-manager /usr/bin/xfce4-session   #update-alt
 export DISPLAY=:0.0
 #--- axiom / axiomd (May 18 2010) XFCE4 theme ~ http://xfce-look.org/content/show.php/axiom+xfwm?content=90145
 mkdir -p ~/.themes/
-timeout 300 curl --progress -k -L -f "https://dl.opendesktop.org/api/files/download/id/1461767736/90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
+timeout 300 curl --progress-bar -k -L -f "https://dl.opendesktop.org/api/files/download/id/1461767736/90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading axiom.tar.gz" 1>&2    #***!!! hardcoded path!
 tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
 xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
 xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
 #--- Get new desktop wallpaper      (All are #***!!! hardcoded paths!)
 mkdir -p /usr/share/wallpapers/
-echo -n '[1/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_A.png" > /usr/share/wallpapers/kali_blue_3d_a.png \
+echo -n '[1/10]'; timeout 300 curl --progress-bar -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_A.png" > /usr/share/wallpapers/kali_blue_3d_a.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_3d_a.png" 1>&2
-echo -n '[2/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_B.png" > /usr/share/wallpapers/kali_blue_3d_b.png \
+echo -n '[2/10]'; timeout 300 curl --progress-bar -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_B.png" > /usr/share/wallpapers/kali_blue_3d_b.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_3d_b.png" 1>&2
-echo -n '[3/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_G.png" > /usr/share/wallpapers/kali_black_honeycomb.png \
+echo -n '[3/10]'; timeout 300 curl --progress-bar -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_G.png" > /usr/share/wallpapers/kali_black_honeycomb.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_honeycomb.png" 1>&2
-echo -n '[4/10]'; timeout 300 curl --progress -k -L -f "https://lh5.googleusercontent.com/-CW1-qRVBiqc/U7ARd2T9LCI/AAAAAAAAAGw/oantfR6owSg/w1920-h1080/vzex.png" > /usr/share/wallpapers/kali_blue_splat.png \
+echo -n '[4/10]'; timeout 300 curl --progress-bar -k -L -f "https://lh5.googleusercontent.com/-CW1-qRVBiqc/U7ARd2T9LCI/AAAAAAAAAGw/oantfR6owSg/w1920-h1080/vzex.png" > /usr/share/wallpapers/kali_blue_splat.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_splat.png" 1>&2
-echo -n '[5/10]'; timeout 300 curl --progress -k -L -f "http://wallpaperstock.net/kali-linux_wallpapers_39530_1920x1080.jpg" > /usr/share/wallpapers/kali-linux_wallpapers_39530.png \
+echo -n '[5/10]'; timeout 300 curl --progress-bar -k -L -f "http://wallpaperstock.net/kali-linux_wallpapers_39530_1920x1080.jpg" > /usr/share/wallpapers/kali-linux_wallpapers_39530.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali-linux_wallpapers_39530.png" 1>&2
-echo -n '[6/10]'; timeout 300 curl --progress -k -L -f "http://em3rgency.com/wp-content/uploads/2012/12/Kali-Linux-faded-no-Dragon-small-text.png" > /usr/share/wallpapers/kali_black_clean.png \
+echo -n '[6/10]'; timeout 300 curl --progress-bar -k -L -f "http://em3rgency.com/wp-content/uploads/2012/12/Kali-Linux-faded-no-Dragon-small-text.png" > /usr/share/wallpapers/kali_black_clean.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_clean.png" 1>&2
-#echo -n '[7/10]'; timeout 300 curl --progress -k -L -f "http://www.hdwallpapers.im/download/kali_linux-wallpaper.jpg" > /usr/share/wallpapers/kali_black_stripes.jpg \
+#echo -n '[7/10]'; timeout 300 curl --progress-bar -k -L -f "http://www.hdwallpapers.im/download/kali_linux-wallpaper.jpg" > /usr/share/wallpapers/kali_black_stripes.jpg \
 #  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_stripes.jpg" 1>&2
-echo -n '[8/10]'; timeout 300 curl --progress -k -L -f "http://fc01.deviantart.net/fs71/f/2011/118/e/3/bt___edb_wallpaper_by_xxdigipxx-d3f4nxv.png" > /usr/share/wallpapers/kali_bt_edb.jpg \
+echo -n '[8/10]'; timeout 300 curl --progress-bar -k -L -f "http://fc01.deviantart.net/fs71/f/2011/118/e/3/bt___edb_wallpaper_by_xxdigipxx-d3f4nxv.png" > /usr/share/wallpapers/kali_bt_edb.jpg \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_bt_edb.jpg" 1>&2
-echo -n '[9/10]'; timeout 300 curl --progress -k -L -f "http://pre07.deviantart.net/58d1/th/pre/i/2015/223/4/8/kali_2_0_alternate_wallpaper_by_xxdigipxx-d95800s.png" > /usr/share/wallpapers/kali_2_0_alternate_wallpaper.png \
+echo -n '[9/10]'; timeout 300 curl --progress-bar -k -L -f "http://pre07.deviantart.net/58d1/th/pre/i/2015/223/4/8/kali_2_0_alternate_wallpaper_by_xxdigipxx-d95800s.png" > /usr/share/wallpapers/kali_2_0_alternate_wallpaper.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_2_0_alternate_wallpaper.png" 1>&2
-echo -n '[10/10]'; timeout 300 curl --progress -k -L -f "http://pre01.deviantart.net/4210/th/pre/i/2015/195/3/d/kali_2_0__personal__wp_by_xxdigipxx-d91c8dq.png" > /usr/share/wallpapers/kali_2_0_personal.png \
+echo -n '[10/10]'; timeout 300 curl --progress-bar -k -L -f "http://pre01.deviantart.net/4210/th/pre/i/2015/195/3/d/kali_2_0__personal__wp_by_xxdigipxx-d91c8dq.png" > /usr/share/wallpapers/kali_2_0_personal.png \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_2_0_personal.png" 1>&2
 _TMP="$(find /usr/share/wallpapers/ -maxdepth 1 -type f -name 'kali_*' | xargs -n1 file | grep -i 'HTML\|empty' | cut -d ':' -f1)"
 for FILE in $(echo ${_TMP}); do rm -f "${FILE}"; done
@@ -1141,7 +1141,7 @@ sed -i 's_^TerminalEmulator=.*_TerminalEmulator=debian-x-terminal-emulator_' "${
 apt -y -qq install zsh git curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Setup oh-my-zsh
-timeout 300 curl --progress -k -L -f "https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh" | zsh
+timeout 300 curl --progress-bar -k -L -f "https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh" | zsh
 #--- Configure zsh
 file=~/.zshrc; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/zsh/zshrc
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
@@ -1392,7 +1392,7 @@ sed -i 's/^.network.security.ports.banned.override/user_pref("network.security.p
 file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'bookmarks.html' -print -quit)
 [ -e "${file}" ] \
   && cp -n $file{,.bkup}   #/etc/firefox-esr/profile/bookmarks.html
-#timeout 300 curl --progress -k -L -f "http://pentest-bookmarks.googlecode.com/files/bookmarksv1.5.html" > /tmp/bookmarks_new.html \
+#timeout 300 curl --progress-bar -k -L -f "http://pentest-bookmarks.googlecode.com/files/bookmarksv1.5.html" > /tmp/bookmarks_new.html \
 #  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading bookmarks_new.html" 1>&2      #***!!! hardcoded version! Need to manually check for updates
 #--- Configure bookmarks
 #awk '!a[$0]++' /tmp/bookmarks_new.html \
@@ -1436,53 +1436,53 @@ ffpath="$(find ~/.mozilla/firefox/*.default*/ -maxdepth 0 -mindepth 0 -type d -n
   && echo -e ' '${RED}'[!]'${RESET}" Couldn't find Firefox folder" 1>&2
 mkdir -p "${ffpath}/"
 #--- plug-n-hack
-#curl --progress -k -L -f "https://github.com/mozmark/ringleader/blob/master/fx_pnh.xpi?raw=true????????????????"  \
+#curl --progress-bar -k -L -f "https://github.com/mozmark/ringleader/blob/master/fx_pnh.xpi?raw=true????????????????"  \
 #  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'plug-n-hack' 1>&2
 #--- HttpFox
-#curl --progress -k -L -f "https://addons.mozilla.org/en-GB/firefox/addon/httpfox/??????????????"  \
+#curl --progress-bar -k -L -f "https://addons.mozilla.org/en-GB/firefox/addon/httpfox/??????????????"  \
 #  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HttpFox' 1>&2
 #--- SQLite Manager
-echo -n '[1/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/5817/addon-5817-latest.xpi?src=dp-btn-primary" \
+echo -n '[1/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/5817/addon-5817-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/SQLiteManager@mrinalkant.blogspot.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'SQLite Manager'" 1>&2
 #--- Cookies Manager+
-echo -n '[2/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/92079/addon-92079-latest.xpi?src=dp-btn-primary" \
+echo -n '[2/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/92079/addon-92079-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{bb6bc1bb-f824-4702-90cd-35e2fb24f25d}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Cookies Manager+'" 1>&2
 #--- Firebug
-echo -n '[3/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/1843/addon-1843-latest.xpi?src=dp-btn-primary" \
+echo -n '[3/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/1843/addon-1843-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/firebug@software.joehewitt.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Firebug'" 1>&2
 #--- FoxyProxy Basic
-echo -n '[4/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/15023/addon-15023-latest.xpi?src=dp-btn-primary" \
+echo -n '[4/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/15023/addon-15023-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/foxyproxy-basic@eric.h.jung.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'FoxyProxy Basic'" 1>&2
 #--- User Agent Overrider
-echo -n '[5/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/429678/addon-429678-latest.xpi?src=dp-btn-primary" \
+echo -n '[5/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/429678/addon-429678-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/useragentoverrider@qixinglu.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'User Agent Overrider'" 1>&2
 #--- HTTPS Everywhere
-echo -n '[6/11]'; timeout 300 curl --progress -k -L -f "https://www.eff.org/files/https-everywhere-latest.xpi" \
+echo -n '[6/11]'; timeout 300 curl --progress-bar -k -L -f "https://www.eff.org/files/https-everywhere-latest.xpi" \
   -o "${ffpath}/https-everywhere@eff.org.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HTTPS Everywhere'" 1>&2
 #--- Live HTTP Headers
-echo -n '[7/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3829/addon-3829-latest.xpi?src=dp-btn-primary" \
+echo -n '[7/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3829/addon-3829-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{8f8fe09b-0bd3-4470-bc1b-8cad42b8203a}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Live HTTP Headers'" 1>&2
 #---Tamper Data
-echo -n '[8/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/966/addon-966-latest.xpi?src=dp-btn-primary" \
+echo -n '[8/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/966/addon-966-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{9c51bd27-6ed8-4000-a2bf-36cb95c0c947}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Tamper Data'" 1>&2
 #--- Disable Add-on Compatibility Checks
-echo -n '[9/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/300254/addon-300254-latest.xpi?src=dp-btn-primary" \
+echo -n '[9/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/300254/addon-300254-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/check-compatibility@dactyl.googlecode.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Disable Add-on Compatibility Checks'" 1>&2
 #--- Disable HackBar
-echo -n '[10/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3899/addon-3899-latest.xpi?src=dp-btn-primary" \
+echo -n '[10/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3899/addon-3899-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{F5DDF39C-9293-4d5e-9AA8-E04E6DD5E9B4}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HackBar'" 1>&2
 #--- uBlock
-echo -n '[11/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/607454/addon-607454-latest.xpi?src=dp-btn-primary" \
+echo -n '[11/11]'; timeout 300 curl --progress-bar -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/607454/addon-607454-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'uBlock'" 1>&2
 #--- Installing extensions
@@ -1855,7 +1855,7 @@ done
 
 ##### Install PyCharm (Community Edition)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}PyCharm (Community Edition)${RESET} ~ Python IDE"
-timeout 300 curl --progress -k -L -f "https://download.jetbrains.com/python/pycharm-community-2016.2.3.tar.gz" > /tmp/pycharms-community.tar.gz \
+timeout 300 curl --progress-bar -k -L -f "https://download.jetbrains.com/python/pycharm-community-2016.2.3.tar.gz" > /tmp/pycharms-community.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pycharms-community.tar.gz" 1>&2       #***!!! hardcoded version!
 if [ -e /tmp/pycharms-community.tar.gz ]; then
   tar -xf /tmp/pycharms-community.tar.gz -C /tmp/
@@ -1898,7 +1898,7 @@ if [[ "${openVAS}" != "false" ]]; then
   #--- Bug fix (target credentials creation)
   mkdir -p /var/lib/openvas/gnupg/
   #--- Bug fix (keys)
-  curl --progress -k -L -f "http://www.openvas.org/OpenVAS_TI.asc" | gpg --import - \
+  curl --progress-bar -k -L -f "http://www.openvas.org/OpenVAS_TI.asc" | gpg --import - \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading OpenVAS_TI.asc" 1>&2
   #--- Make sure all services are correct
   openvas-start
@@ -1964,7 +1964,7 @@ EOF
   rm -f /tmp/burp.crt
   while test -d /proc/${PID}; do
     sleep 1s
-    curl --progress -k -L -f "http://burp/cert" -o /tmp/burp.crt 2>/dev/null      # || echo -e ' '${RED}'[!]'${RESET}" Issue downloading burp.crt" 1>&2
+    curl --progress-bar -k -L -f "http://burp/cert" -o /tmp/burp.crt 2>/dev/null      # || echo -e ' '${RED}'[!]'${RESET}" Issue downloading burp.crt" 1>&2
     [ -f /tmp/burp.crt ] && break
   done
   timeout 5 kill ${PID} 2>/dev/null \
@@ -2341,7 +2341,7 @@ apt -y -qq install aircrack-ng curl \
 #--- Setup hardware database
 mkdir -p /etc/aircrack-ng/
 (timeout 600 airodump-ng-oui-update 2>/dev/null) \
-  || timeout 600 curl --progress -k -L -f "http://standards-oui.ieee.org/oui/oui.txt" > /etc/aircrack-ng/oui.txt
+  || timeout 600 curl --progress-bar -k -L -f "http://standards-oui.ieee.org/oui/oui.txt" > /etc/aircrack-ng/oui.txt
 [ -e /etc/aircrack-ng/oui.txt ] \
   && (\grep "(hex)" /etc/aircrack-ng/oui.txt | sed 's/^[ \t]*//g;s/[ \t]*$//g' > /etc/aircrack-ng/airodump-ng-oui.txt)
 [[ ! -f /etc/aircrack-ng/airodump-ng-oui.txt ]] \
@@ -2380,7 +2380,7 @@ apt -y -qq install wifite \
 apt -y -qq install nmap curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 mkdir -p /usr/share/nmap/scripts/vulscan/
-timeout 300 curl --progress -k -L -f "http://www.computec.ch/projekte/vulscan/download/nmap_nse_vulscan-2.0.tar.gz" > /tmp/nmap_nse_vulscan.tar.gz \
+timeout 300 curl --progress-bar -k -L -f "http://www.computec.ch/projekte/vulscan/download/nmap_nse_vulscan-2.0.tar.gz" > /tmp/nmap_nse_vulscan.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2      #***!!! hardcoded version! Need to manually check for updates
 gunzip /tmp/nmap_nse_vulscan.tar.gz
 tar -xf /tmp/nmap_nse_vulscan.tar -C /usr/share/nmap/scripts/
@@ -2434,7 +2434,7 @@ ln -sf /opt/gnmap-parser-git/gnmap-parser.sh /usr/local/bin/gnmap-parser-git
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}udp-proto-scanner${RESET} ~ common UDP port scanner"
 apt -y -qq install curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-timeout 300 curl --progress -k -L -f "https://labs.portcullis.co.uk/download/udp-proto-scanner-1.1.tar.gz" -o /tmp/udp-proto-scanner.tar.gz \
+timeout 300 curl --progress-bar -k -L -f "https://labs.portcullis.co.uk/download/udp-proto-scanner-1.1.tar.gz" -o /tmp/udp-proto-scanner.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading udp-proto-scanner.tar.gz" 1>&2
 gunzip /tmp/udp-proto-scanner.tar.gz
 tar -xf /tmp/udp-proto-scanner.tar -C /opt/
@@ -2577,7 +2577,7 @@ ln -sf /opt/cmdsql-git /usr/share/webshells/aspx/cmdsql
 apt -y -qq install curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 mkdir -p /opt/jsp-filebrowser/
-timeout 300 curl --progress -k -L -f "http://www.vonloesch.de/files/browser.zip" > /tmp/jsp.zip \
+timeout 300 curl --progress-bar -k -L -f "http://www.vonloesch.de/files/browser.zip" > /tmp/jsp.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading jsp.zip" 1>&2
 unzip -q -o -d /opt/jsp-filebrowser/ /tmp/jsp.zip
 #--- Link to others
@@ -2869,7 +2869,7 @@ echo -e 'application/x-ms-dos-executable=wine.desktop' >> "${file}"
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}MinGW (Windows)${RESET} ~ cross compiling suite"
 apt -y -qq install wine curl unzip \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/mingw/files/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip/download" > /tmp/mingw-get.zip \
+timeout 300 curl --progress-bar -k -L -f "http://sourceforge.net/projects/mingw/files/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip/download" > /tmp/mingw-get.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading mingw-get.zip" 1>&2       #***!!! hardcoded path!
 mkdir -p ~/.wine/drive_c/MinGW/bin/
 unzip -q -o -d ~/.wine/drive_c/MinGW/ /tmp/mingw-get.zip
@@ -2887,9 +2887,9 @@ grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Downloading ${GREEN}AccessChk.exe${RESET} ~ Windows environment tester"
 apt -y -qq install curl windows-binaries unzip \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://web.archive.org/web/20080530012252/http://live.sysinternals.com/accesschk.exe" > /usr/share/windows-binaries/accesschk_v5.02.exe \
+echo -n '[1/2]'; timeout 300 curl --progress-bar -k -L -f "https://web.archive.org/web/20080530012252/http://live.sysinternals.com/accesschk.exe" > /usr/share/windows-binaries/accesschk_v5.02.exe \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading accesschk_v5.02.exe" 1>&2   #***!!! hardcoded path!
-echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "https://download.sysinternals.com/files/AccessChk.zip" > /usr/share/windows-binaries/AccessChk.zip \
+echo -n '[2/2]'; timeout 300 curl --progress-bar -k -L -f "https://download.sysinternals.com/files/AccessChk.zip" > /usr/share/windows-binaries/AccessChk.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading AccessChk.zip" 1>&2
 unzip -q -o -d /usr/share/windows-binaries/ /usr/share/windows-binaries/AccessChk.zip
 rm -f /usr/share/windows-binaries/{AccessChk.zip,Eula.txt}
@@ -2899,9 +2899,9 @@ rm -f /usr/share/windows-binaries/{AccessChk.zip,Eula.txt}
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Downloading ${GREEN}PsExec.exe${RESET} ~ Pass The Hash 'phun'"
 apt -y -qq install curl windows-binaries unzip unrar \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://download.sysinternals.com/files/PSTools.zip" > /tmp/pstools.zip \
+echo -n '[1/2]'; timeout 300 curl --progress-bar -k -L -f "https://download.sysinternals.com/files/PSTools.zip" > /tmp/pstools.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pstools.zip" 1>&2
-echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://www.coresecurity.com/system/files/pshtoolkit_v1.4.rar" > /tmp/pshtoolkit.rar \
+echo -n '[2/2]'; timeout 300 curl --progress-bar -k -L -f "http://www.coresecurity.com/system/files/pshtoolkit_v1.4.rar" > /tmp/pshtoolkit.rar \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pshtoolkit.rar" 1>&2  #***!!! hardcoded path!
 unzip -q -o -d /usr/share/windows-binaries/pstools/ /tmp/pstools.zip
 unrar x -y /tmp/pshtoolkit.rar /usr/share/windows-binaries/ >/dev/null
@@ -2909,9 +2909,9 @@ unrar x -y /tmp/pshtoolkit.rar /usr/share/windows-binaries/ >/dev/null
 
 ##### Install Python (Windows via WINE)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Python (Windows)${RESET}"
-echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://www.python.org/ftp/python/2.7.9/python-2.7.9.msi" > /tmp/python.msi \
+echo -n '[1/2]'; timeout 300 curl --progress-bar -k -L -f "https://www.python.org/ftp/python/2.7.9/python-2.7.9.msi" > /tmp/python.msi \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading python.msi" 1>&2       #***!!! hardcoded path!
-echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py2.7.exe/download" > /tmp/pywin32.exe \
+echo -n '[2/2]'; timeout 300 curl --progress-bar -k -L -f "http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py2.7.exe/download" > /tmp/pywin32.exe \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pywin32.exe" 1>&2      #***!!! hardcoded path!
 wine msiexec /i /tmp/python.msi /qb 2>&1 | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
 pushd /tmp/ >/dev/null
@@ -2938,12 +2938,12 @@ sed -i 's/TERMINAL_CLEAR=".*"/TERMINAL_CLEAR="false"/' /etc/veil/settings.py
 apt -y -qq install upx-ucl curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 mkdir -p /opt/packers/
-echo -n '[1/3]'; timeout 300 curl --progress -k -L -f "http://www.eskimo.com/~scottlu/win/cexe.exe" > /opt/packers/cexe.exe \
+echo -n '[1/3]'; timeout 300 curl --progress-bar -k -L -f "http://www.eskimo.com/~scottlu/win/cexe.exe" > /opt/packers/cexe.exe \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading cexe.exe" 1>&2            #***!!! hardcoded version! Need to manually check for updates
-echo -n '[2/3]'; timeout 300 curl --progress -k -L -f "http://www.farbrausch.de/~fg/kkrunchy/kkrunchy_023a2.zip" > /opt/packers/kkrunchy.zip \
+echo -n '[2/3]'; timeout 300 curl --progress-bar -k -L -f "http://www.farbrausch.de/~fg/kkrunchy/kkrunchy_023a2.zip" > /opt/packers/kkrunchy.zip \
   && unzip -q -o -d /opt/packers/ /opt/packers/kkrunchy.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kkrunchy.zip" 1>&2        #***!!! hardcoded version! Need to manually check for updates
-echo -n '[3/3]'; timeout 300 curl --progress -k -L -f "https://github.com/Veil-Framework/Veil-Evasion/blob/master/tools/pescrambler/PEScrambler.exe" > /opt/packers/PEScrambler \
+echo -n '[3/3]'; timeout 300 curl --progress-bar -k -L -f "https://github.com/Veil-Framework/Veil-Evasion/blob/master/tools/pescrambler/PEScrambler.exe" > /opt/packers/PEScrambler \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading PEScrambler.exe" 1>&2     #***!!! hardcoded version! Need to manually check for updates
 #*** ??????? Need to make a bash script like hyperion...
 #--- Link to others
@@ -3057,8 +3057,8 @@ apt -y -qq install wordlists curl \
   && gzip -dc < /usr/share/wordlists/rockyou.txt.gz > /usr/share/wordlists/rockyou.txt
 #--- Add 10,000 Top/Worst/Common Passwords
 mkdir -p /usr/share/wordlists/
-(curl --progress -k -L -f "http://xato.net/files/10k most common.zip" > /tmp/10kcommon.zip 2>/dev/null \
-  || curl --progress -k -L -f "http://download.g0tmi1k.com/wordlists/common-10k_most_common.zip" > /tmp/10kcommon.zip 2>/dev/null) \
+(curl --progress-bar -k -L -f "http://xato.net/files/10k most common.zip" > /tmp/10kcommon.zip 2>/dev/null \
+  || curl --progress-bar -k -L -f "http://download.g0tmi1k.com/wordlists/common-10k_most_common.zip" > /tmp/10kcommon.zip 2>/dev/null) \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 10kcommon.zip" 1>&2
 unzip -q -o -d /usr/share/wordlists/ /tmp/10kcommon.zip 2>/dev/null   #***!!! hardcoded version! Need to manually check for updates
 mv -f /usr/share/wordlists/10k{\ most\ ,_most_}common.txt
@@ -3103,7 +3103,7 @@ apt -y -qq install curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 mkdir -p /usr/share/checksec/
 file=/usr/share/checksec/checksec.sh
-timeout 300 curl --progress -k -L -f "http://www.trapkit.de/tools/checksec.sh" > "${file}" \
+timeout 300 curl --progress-bar -k -L -f "http://www.trapkit.de/tools/checksec.sh" > "${file}" \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading checksec.sh" 1>&2     #***!!! hardcoded patch
 chmod +x "${file}"
 
@@ -3360,7 +3360,7 @@ apt -y -qq install nbtscan \
 #nbtscan -r 192.168.0.1/24 -v
 #--- unixwiz - 1.0.x
 mkdir -p /usr/local/src/nbtscan-unixwiz/
-timeout 300 curl --progress -k -L -f "http://unixwiz.net/tools/nbtscan-source-1.0.35.tgz" > /usr/local/src/nbtscan-unixwiz/nbtscan.tgz \
+timeout 300 curl --progress-bar -k -L -f "http://unixwiz.net/tools/nbtscan-source-1.0.35.tgz" > /usr/local/src/nbtscan-unixwiz/nbtscan.tgz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading nbtscan.tgz" 1>&2    #***!!! hardcoded version! Need to manually check for updates
 tar -zxf /usr/local/src/nbtscan-unixwiz/nbtscan.tgz -C /usr/local/src/nbtscan-unixwiz/
 pushd /usr/local/src/nbtscan-unixwiz/ >/dev/null
@@ -3553,7 +3553,7 @@ apt -y -qq install curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 arch="i386"
 [[ "$(uname -m)" == "x86_64" ]] && arch="amd64"
-timeout 300 curl --progress -k -L -f "http://dbeaver.jkiss.org/files/dbeaver-ce_latest_${arch}.deb" > /tmp/dbeaver.deb \
+timeout 300 curl --progress-bar -k -L -f "http://dbeaver.jkiss.org/files/dbeaver-ce_latest_${arch}.deb" > /tmp/dbeaver.deb \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading dbeaver.deb" 1>&2   #***!!! hardcoded version! Need to manually check for updates
 if [ -e /tmp/dbeaver.deb ]; then
   dpkg -i /tmp/dbeaver.deb
